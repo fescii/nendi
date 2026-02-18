@@ -1055,7 +1055,7 @@ version     = "0.1.0"
 edition     = "2021"
 description = "Official Rust client SDK for the Nendi change data capture daemon"
 license     = "Apache-2.0"
-repository  = "https://github.com/your-org/nendi"
+repository  = "https://github.com/fescii/nendi"
 keywords    = ["cdc", "streaming", "postgres", "database", "realtime"]
 categories  = ["database", "asynchronous", "network-programming"]
 
