@@ -32,3 +32,6 @@ Thumbs.db
 ! .env.example
 tests/csvs/
 *.log
+
+# Temporarily disable .github
+.github/
