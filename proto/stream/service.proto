@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package nendi.stream;
+
+import "stream/types.proto";
+
+option java_package = "io.nendi.stream";
+
+// The CDC streaming service.
+service NendiStream {
+  // Subscribe to a stream of change events.
+  rpc Subscribe(SubscribeRequest) returns (stream ChangeEvent);
+
+  // Commit a consumer offset.
+  rpc CommitOffset(CommitRequest) returns (CommitResponse);
+
+  // Get the current status of a consumer.
+  rpc GetStatus(StatusRequest) returns (StatusResponse);
+}
+
+// Request to subscribe to a change event stream.
+message SubscribeRequest {
+  string consumer = 1;
+  uint64 resume = 2;         // Resume from this LSN (0 = beginning)
+  repeated string tables = 3;
+  uint32 credits = 4;        // Flow control window
+}
+
+// Request to commit a consumer offset.
+message CommitRequest {
+  string consumer = 1;
+  uint64 lsn = 2;
+}
+
+message CommitResponse {
+  bool ok = 1;
+  string error = 2;
+}
+
+// Request to get consumer status.
+message StatusRequest {
+  string consumer = 1;
+}
+
+message StatusResponse {
+  string consumer = 1;
+  uint64 committed = 2;
+  uint64 head = 3;
+  uint64 lag = 4;
+  bool connected = 5;
+}

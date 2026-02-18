@@ -1,0 +1,20 @@
+[package]
+name = "nendi-http"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+shared = { package = "nendi-shared", path = "../shared" }
+nendi-core = { path = "../core" }
+
+tokio.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+bytes.workspace = true
+serde.workspace = true
+tonic.workspace = true
+prost.workspace = true
+reqwest.workspace = true

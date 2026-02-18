@@ -1,0 +1,30 @@
+# Nendi CDC Daemon — Development Configuration
+# Overrides for local development.
+
+[source]
+host = "localhost"
+port = 5432
+database = "nendi_dev"
+user = "nendi_repl"
+password = "dev_password"
+
+[storage]
+data_dir = "./data/dev"
+direct_io = false       # Often unsupported on dev filesystems
+compression = "none"
+
+[pipeline]
+ring_buffer_capacity = 4096
+flush_max_bytes = 1048576   # 1 MiB
+flush_max_age_us = 50000    # 50 ms
+
+[grpc]
+listen_addr = "[::1]:50051"
+max_streams = 8
+
+[memory]
+budget_bytes = 134217728 # 128 MiB
+
+[observability]
+log_level = "debug"
+log_format = "pretty"

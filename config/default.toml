@@ -1,0 +1,59 @@
+# Nendi CDC Daemon — Default Configuration
+# This file contains all default values. Environment-specific files
+# override only the values that differ.
+
+[source]
+connection_string = "host=localhost port=5432 dbname=nendi user=fescii password=Fescii333"
+
+[slot]
+name = "nendi_slot"
+auto_create = true
+wal_lag_hard_cap_bytes = 1073741824 # 1 GiB
+lag_check_interval_secs = 30
+
+[publication]
+name = "nendi_pub"
+auto_create = true
+tables = []        # Empty = all tables
+
+[storage]
+data_dir = "/var/lib/nendi/data"
+write_buffer_size = 268435456    # 256 MiB
+max_write_buffers = 4
+block_cache_size = 134217728     # 128 MiB
+direct_io = true
+compression = "lz4"
+ttl_secs = 0                     # 0 = no expiry
+
+[pipeline]
+ring_buffer_capacity = 65536
+flush_max_bytes = 4194304    # 4 MiB
+flush_max_age_us = 100000    # 100 ms
+max_in_flight = 1000
+
+[pipeline.filters]
+# Table-level ingestion filters (Layer 2)
+# Example: "public.events" = "op:insert,update"
+
+[grpc]
+listen_addr = "[::1]:50051"
+max_streams = 64
+credit_window = 1000
+
+[webhook]
+url = ""
+batch_size = 100
+linger_ms = 200
+timeout_ms = 30000
+max_retries = 5
+retry_backoff_ms = 500
+hmac_secret = ""
+
+[memory]
+budget_bytes = 536870912 # 512 MiB
+warn_threshold = 0.85
+
+[observability]
+metrics_listen_addr = "0.0.0.0:9090"
+log_level = "info"
+log_format = "json"

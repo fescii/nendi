@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package nendi.stream;
+
+option java_package = "io.nendi.stream";
+
+// Core types for the CDC event stream.
+
+// Operation kind on a row.
+enum OpKind {
+  OP_UNSPECIFIED = 0;
+  INSERT = 1;
+  UPDATE = 2;
+  DELETE = 3;
+  TRUNCATE = 4;
+}
+
+// A single column value.
+message ColumnValue {
+  string name = 1;
+  uint32 oid = 2;
+  optional string value = 3;
+}
+
+// A row of column values.
+message RowData {
+  repeated ColumnValue columns = 1;
+}
+
+// Fully qualified table identifier.
+message TableId {
+  string schema = 1;
+  string table = 2;
+}
+
+// A single change event from the WAL.
+message ChangeEvent {
+  uint64 lsn = 1;
+  uint32 xid = 2;
+  OpKind op = 3;
+  TableId table = 4;
+  uint64 fingerprint = 5;
+  optional RowData before = 6;
+  optional RowData after = 7;
+  uint64 committed = 8;
+}

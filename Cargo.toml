@@ -1,0 +1,70 @@
+[workspace]
+resolver = "2"
+members = [
+    "cmd/nendi",
+    "core",
+    "services/pgsql",
+    "shared",
+    "http",
+    "tests/integration",
+    "tests/bench",
+    "sdk/rust",
+    "sdk/rust-derive",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Nendi Contributors"]
+license = "Apache-2.0"
+repository = "https://github.com/your-org/nendi"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.49.0", features = ["full"] }
+async-trait = "0.1.89"
+
+# Storage
+rocksdb = "0.24.0"
+
+# gRPC / Protobuf
+tonic = "0.14.4"
+prost = "0.14.3"
+
+# Serialization
+rkyv = "0.8.15"
+serde = { version = "1", features = ["derive"] }
+
+# HTTP (webhook dispatcher)
+reqwest = { version = "0.13.2", features = ["json", "stream"] }
+
+# Observability
+prometheus = "0.14.0"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
+
+# Shared utilities
+bytes = "1.11.1"
+dashmap = "6.1.0"
+crossbeam = "0.8.4"
+thiserror = "2.0.18"
+anyhow = "1.0.101"
+
+# Config
+config = "0.15.19"
+toml = "0.8"
+tokio-postgres = "0.7.16"
+postgres-protocol = "0.6.10"
+
+# JSON
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true
+
+[profile.bench]
+inherits = "release"
+debug = true

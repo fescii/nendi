@@ -1,0 +1,66 @@
+# Nendi CDC Daemon — Configuration Schema
+# Documents the full configuration structure and valid values.
+
+# ╔══════════════════════════════════════════════════════╗
+# ║ This file is documentation only.                     ║
+# ║ See default.toml for actual defaults.                ║
+# ╚══════════════════════════════════════════════════════╝
+
+# [source]
+# host        = "string"     # PostgreSQL host
+# port        = 5432         # PostgreSQL port (1-65535)
+# database    = "string"     # Database name
+# user        = "string"     # Replication user
+# password    = "string"     # Password (or env var reference)
+
+# [slot]
+# name                    = "string"   # Replication slot name
+# auto_create             = true       # Auto-create slot if missing
+# wal_lag_hard_cap_bytes  = 1073741824 # Hard cap before pause (bytes)
+# lag_check_interval_secs = 30         # Lag check interval (seconds)
+
+# [publication]
+# name        = "string"    # Publication name
+# auto_create = true        # Auto-create publication if missing
+# tables      = []          # Tables to include (empty = all)
+
+# [storage]
+# data_dir          = "string"  # RocksDB data directory
+# write_buffer_size = 268435456 # Write buffer size (bytes)
+# max_write_buffers = 4         # Max write buffers before stall
+# block_cache_size  = 134217728 # Block cache for reads (bytes)
+# direct_io         = true      # Direct I/O for flush/compaction
+# compression       = "lz4"     # none | snappy | lz4 | zstd
+# ttl_secs          = 0         # Event TTL (0 = no expiry)
+
+# [pipeline]
+# ring_buffer_capacity = 65536    # Ring buffer size (events)
+# flush_max_bytes      = 4194304  # Max bytes before flush
+# flush_max_age_us     = 100000   # Max age before flush (μs)
+# max_in_flight        = 1000     # Max in-flight events
+
+# [pipeline.filters]
+# "schema.table" = "op:insert,update; column == value"
+
+# [grpc]
+# listen_addr   = "[::1]:50051"  # gRPC bind address
+# max_streams   = 64             # Max concurrent streams
+# credit_window = 1000           # Credits per consumer
+
+# [webhook]
+# url              = "string"  # Webhook endpoint URL
+# batch_size       = 100       # Events per batch
+# linger_ms        = 200       # Max batch linger time
+# timeout_ms       = 30000     # HTTP timeout
+# max_retries      = 5         # Retry attempts
+# retry_backoff_ms = 500       # Initial backoff
+# hmac_secret      = ""        # HMAC signing secret
+
+# [memory]
+# budget_bytes    = 536870912  # Total memory budget
+# warn_threshold  = 0.85       # Warning threshold (0.0-1.0)
+
+# [observability]
+# metrics_listen_addr = "0.0.0.0:9090"
+# log_level           = "info"     # trace | debug | info | warn | error
+# log_format          = "json"     # json | pretty

@@ -1,0 +1,41 @@
+# Nendi CDC Daemon — Testing Configuration
+# Small buffers for fast test cycles.
+
+[source]
+host = "localhost"
+port = 5432
+database = "nendi_test"
+user = "nendi_repl"
+password = "test_password"
+
+[slot]
+name = "nendi_test_slot"
+wal_lag_hard_cap_bytes = 104857600 # 100 MiB
+
+[publication]
+name = "nendi_test_pub"
+
+[storage]
+data_dir = "/tmp/nendi-test-data"
+write_buffer_size = 16777216      # 16 MiB
+max_write_buffers = 2
+block_cache_size = 8388608        # 8 MiB
+direct_io = false
+compression = "none"
+ttl_secs = 3600                   # 1 hour
+
+[pipeline]
+ring_buffer_capacity = 1024
+flush_max_bytes = 262144    # 256 KiB
+flush_max_age_us = 10000    # 10 ms
+
+[grpc]
+listen_addr = "[::1]:50052"
+max_streams = 4
+
+[memory]
+budget_bytes = 67108864 # 64 MiB
+
+[observability]
+log_level = "trace"
+log_format = "pretty"

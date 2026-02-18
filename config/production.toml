@@ -1,0 +1,39 @@
+# Nendi CDC Daemon — Production Configuration
+# Tuned for throughput and reliability.
+
+[source]
+host = "${NENDI_PG_HOST}"
+port = 5432
+database = "${NENDI_PG_DATABASE}"
+user = "${NENDI_PG_USER}"
+password = "${NENDI_PG_PASSWORD}"
+
+[slot]
+wal_lag_hard_cap_bytes = 4294967296 # 4 GiB
+
+[storage]
+data_dir = "/var/lib/nendi/data"
+write_buffer_size = 536870912    # 512 MiB
+max_write_buffers = 6
+block_cache_size = 268435456     # 256 MiB
+direct_io = true
+compression = "lz4"
+ttl_secs = 604800                # 7 days
+
+[pipeline]
+ring_buffer_capacity = 131072
+flush_max_bytes = 8388608     # 8 MiB
+flush_max_age_us = 200000     # 200 ms
+max_in_flight = 5000
+
+[grpc]
+listen_addr = "0.0.0.0:50051"
+max_streams = 128
+credit_window = 5000
+
+[memory]
+budget_bytes = 2147483648 # 2 GiB
+
+[observability]
+log_level = "info"
+log_format = "json"

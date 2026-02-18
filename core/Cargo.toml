@@ -1,0 +1,30 @@
+[package]
+name = "nendi-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+shared = { package = "nendi-shared", path = "../shared" }
+nendi-pgsql = { path = "../services/pgsql" }
+
+tokio.workspace = true
+async-trait.workspace = true
+rocksdb.workspace = true
+tonic.workspace = true
+prost.workspace = true
+rkyv.workspace = true
+serde.workspace = true
+reqwest.workspace = true
+prometheus.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+bytes.workspace = true
+dashmap.workspace = true
+crossbeam.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+config.workspace = true
+toml.workspace = true

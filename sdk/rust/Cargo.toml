@@ -1,0 +1,45 @@
+[package]
+name = "nendi-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "Official Rust client SDK for the Nendi change data capture daemon"
+license = "Apache-2.0"
+repository = "https://github.com/your-org/nendi"
+keywords = ["cdc", "streaming", "postgres", "database", "realtime"]
+categories = ["database", "asynchronous", "network-programming"]
+
+[features]
+default = ["offset-file"]
+offset-file = []
+offset-redis = ["redis"]
+
+[dependencies]
+# gRPC
+tonic = { workspace = true, features = ["transport"] }
+prost = { workspace = true }
+
+# Async
+tokio = { workspace = true, features = ["sync", "time"] }
+tokio-stream = "0.1"
+futures = "0.3"
+async-trait = { workspace = true }
+
+# Serialization
+bytes = { workspace = true }
+serde = { workspace = true }
+
+# Proc macro (derive support)
+nendi-derive = { path = "../rust-derive", version = "0.1" }
+
+# Error handling
+thiserror = { workspace = true }
+
+# Offset stores
+redis = { version = "0.25", optional = true, features = ["tokio-comp"] }
+
+# JSON
+serde_json = { workspace = true }
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+tracing = { workspace = true }

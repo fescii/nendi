@@ -1,0 +1,21 @@
+# Test configuration overlay
+# Merges on top of default.toml for integration tests
+
+[source]
+connection_string = "host=localhost port=5432 dbname=nendi user=fescii password=Fescii333"
+
+[slot]
+name = "nendi_test_slot"
+auto_create = true
+
+[publication]
+name = "nendi_test_pub"
+
+[storage]
+data_dir = "/tmp/nendi-test-data"
+
+[grpc]
+listen_addr = "[::1]:50051"
+
+[observability]
+log_level = "debug"

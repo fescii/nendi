@@ -1,0 +1,24 @@
+[package]
+name = "nendi-shared"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+toml = "0.8"
+tokio.workspace = true
+async-trait.workspace = true
+rkyv.workspace = true
+serde.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+bytes.workspace = true
+dashmap.workspace = true
+crossbeam.workspace = true
+config.workspace = true
+tonic.workspace = true
+prost.workspace = true
+prometheus.workspace = true

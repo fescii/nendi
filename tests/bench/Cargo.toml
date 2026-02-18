@@ -1,0 +1,50 @@
+[package]
+name = "nendi-bench"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+nendi-core = { path = "../../core" }
+shared = { package = "nendi-shared", path = "../../shared" }
+nendi-pgsql = { path = "../../services/pgsql" }
+nendi-http = { path = "../../http" }
+
+tokio.workspace = true
+criterion = { version = "0.5", features = ["async_tokio"] }
+serde.workspace = true
+serde_json.workspace = true
+tempfile = "3.8"
+rand = "0.8"
+
+[[bench]]
+name = "ingestion"
+harness = false
+path = "src/ingestion.rs"
+
+[[bench]]
+name = "storage"
+harness = false
+path = "src/storage.rs"
+
+[[bench]]
+name = "serialize"
+harness = false
+path = "src/serialize.rs"
+
+[[bench]]
+name = "egress"
+harness = false
+path = "src/egress.rs"
+
+[[bench]]
+name = "csv_report"
+harness = false
+path = "src/csv_report.rs"
+
+[[bin]]
+name = "test-report"
+path = "src/bin/test_report.rs"
