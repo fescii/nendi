@@ -1,9 +1,16 @@
 //! Offset types and stores.
 
-pub mod file;
-pub mod nendi;
-pub mod store;
 pub mod types;
 
-pub use store::OffsetStore;
+// Stores require async_trait + tokio — only available with `grpc` feature.
+#[cfg(feature = "grpc")]
+pub mod file;
+#[cfg(feature = "grpc")]
+pub mod nendi;
+#[cfg(feature = "grpc")]
+pub mod store;
+
 pub use types::Offset;
+
+#[cfg(feature = "grpc")]
+pub use store::OffsetStore;

@@ -5,6 +5,7 @@ pub mod ddl;
 pub mod op;
 pub mod typed;
 
+pub use change::decode_to_json;
 pub use change::ChangeEvent;
 pub use ddl::DdlEvent;
 pub use op::Op;

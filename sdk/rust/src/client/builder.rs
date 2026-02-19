@@ -1,6 +1,9 @@
 //! NendiClient builder pattern.
 
+use std::sync::Arc;
 use std::time::Duration;
+
+use tonic::transport::Channel;
 
 use crate::client::config::ClientConfig;
 use crate::error::NendiError;
@@ -11,8 +14,11 @@ use crate::subscription::SubscriptionBuilder;
 ///
 /// Created via `NendiClient::new()` for quick setup, or
 /// `NendiClient::builder()` for full configuration.
+#[derive(Clone)]
 pub struct NendiClient {
-  config: ClientConfig,
+  pub(crate) config: ClientConfig,
+  /// Cheap-to-clone tonic channel (Arc internally).
+  pub(crate) channel: Channel,
 }
 
 /// Builder for configuring a `NendiClient`.
@@ -34,7 +40,7 @@ impl NendiClient {
   }
 
   /// Create a subscription builder for the given stream.
-  pub fn subscription(&self, stream_id: &str) -> SubscriptionBuilder<'_> {
+  pub fn subscription<'c>(&'c self, stream_id: &str) -> SubscriptionBuilder<'c> {
     SubscriptionBuilder::new(self, stream_id)
   }
 
@@ -51,6 +57,11 @@ impl NendiClient {
   /// Returns the client configuration.
   pub fn config(&self) -> &ClientConfig {
     &self.config
+  }
+
+  /// Returns a reference to the underlying tonic channel.
+  pub(crate) fn channel(&self) -> Channel {
+    self.channel.clone()
   }
 }
 
@@ -79,16 +90,28 @@ impl ClientBuilder {
     self
   }
 
-  /// Build and connect the client.
+  /// Build and connect the client using a lazy tonic channel.
+  ///
+  /// The channel does not actually open a TCP connection until the
+  /// first RPC is made — so this method returns immediately even if
+  /// the daemon is not running yet.
   pub async fn build(self) -> Result<NendiClient, NendiError> {
-    // TODO: establish tonic channel connection
     tracing::info!(
         endpoint = %self.config.endpoint,
         "Connecting to Nendi daemon"
     );
 
+    let endpoint = tonic::transport::Endpoint::from_shared(self.config.endpoint.clone())
+      .map_err(|e| NendiError::Connection(e.into()))?
+      .connect_timeout(self.config.connect_timeout)
+      .timeout(self.config.request_timeout);
+
+    // `connect_lazy` returns instantly — no TCP dial happens here.
+    let channel = endpoint.connect_lazy();
+
     Ok(NendiClient {
       config: self.config,
+      channel,
     })
   }
 }

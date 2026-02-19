@@ -5,7 +5,9 @@
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput};
+use syn::{parse_macro_input, Data, DeriveInput, Fields};
+
+// ─── NendiDeserialize ─────────────────────────────────────────────────────────
 
 /// Derive macro that implements `NendiDeserialize` for a struct.
 ///
@@ -48,10 +50,19 @@ pub fn derive_nendi_deserialize(input: TokenStream) -> TokenStream {
     }
   }
 
+  if table_name.is_empty() {
+    return syn::Error::new_spanned(
+      &input.ident,
+      "NendiDeserialize requires #[nendi(table = \"schema.table\")]",
+    )
+    .to_compile_error()
+    .into();
+  }
+
   let table_lit = &table_name;
 
   let expanded = quote! {
-      impl crate::deserialize::traits::NendiDeserialize for #name {
+      impl nendi_sdk::NendiDeserialize for #name {
           fn table_name() -> &'static str {
               #table_lit
           }
@@ -61,10 +72,14 @@ pub fn derive_nendi_deserialize(input: TokenStream) -> TokenStream {
   TokenStream::from(expanded)
 }
 
+// ─── NendiEvent ───────────────────────────────────────────────────────────────
+
 /// Derive macro for multi-table event enums.
 ///
 /// Use on an enum whose variants each contain a `NendiDeserialize` type.
-/// The SDK uses the table name to dispatch to the correct variant.
+/// The SDK matches on `table_name()` to dispatch to the correct variant.
+/// Generated `from_event()` uses a `match` on a static string key — O(1)
+/// branch prediction for ≤20 variants.
 ///
 /// # Example
 ///
@@ -80,11 +95,90 @@ pub fn derive_nendi_deserialize(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(NendiEvent, attributes(nendi))]
 pub fn derive_nendi_event(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
-  let _name = &input.ident;
+  let name = &input.ident;
 
-  // Stub: full implementation will generate a match on table name
-  // and deserialize into the correct variant
-  let expanded = quote! {};
+  // Collect variants with their table attributes.
+  let variants = match &input.data {
+    Data::Enum(e) => &e.variants,
+    _ => {
+      return syn::Error::new_spanned(name, "NendiEvent can only be derived for enums")
+        .to_compile_error()
+        .into();
+    }
+  };
+
+  let mut match_arms = Vec::new();
+
+  for variant in variants {
+    let variant_name = &variant.ident;
+
+    // Extract table from variant's #[nendi(table = "...")] attribute
+    let mut table_name = String::new();
+    for attr in &variant.attrs {
+      if attr.path().is_ident("nendi") {
+        let _ = attr.parse_nested_meta(|meta| {
+          if meta.path.is_ident("table") {
+            let value = meta.value()?;
+            let lit: syn::LitStr = value.parse()?;
+            table_name = lit.value();
+          }
+          Ok(())
+        });
+      }
+    }
+
+    if table_name.is_empty() {
+      return syn::Error::new_spanned(
+        variant_name,
+        "each NendiEvent variant requires #[nendi(table = \"schema.table\")]",
+      )
+      .to_compile_error()
+      .into();
+    }
+
+    // Derive the inner type name
+    let inner_ty = match &variant.fields {
+      Fields::Unnamed(fields) if fields.unnamed.len() == 1 => &fields.unnamed.first().unwrap().ty,
+      _ => {
+        return syn::Error::new_spanned(
+          variant_name,
+          "NendiEvent variants must have exactly one unnamed field",
+        )
+        .to_compile_error()
+        .into();
+      }
+    };
+
+    let table_lit = &table_name;
+    match_arms.push(quote! {
+        #table_lit => {
+            let payload: #inner_ty = event.payload()?;
+            Ok(#name::#variant_name(payload))
+        }
+    });
+  }
+
+  let expanded = quote! {
+      impl #name {
+          /// Dispatch a raw `ChangeEvent` to the correct enum variant
+          /// based on the source table name.
+          ///
+          /// Uses a static string `match` — O(1) branch prediction for
+          /// the common case of ≤20 variants.
+          pub fn from_event(
+              event: &nendi_sdk::ChangeEvent,
+          ) -> Result<Self, nendi_sdk::NendiError> {
+              let key = format!("{}.{}", event.schema(), event.table());
+              match key.as_str() {
+                  #(#match_arms)*
+                  other => Err(nendi_sdk::NendiError::Daemon {
+                      code: 0,
+                      message: format!("unknown table: {other}"),
+                  }),
+              }
+          }
+      }
+  };
 
   TokenStream::from(expanded)
 }

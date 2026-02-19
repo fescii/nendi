@@ -10,6 +10,7 @@ members = [
     "tests/bench",
     "sdk/rust",
     "sdk/rust-derive",
+    "sdk/wasm",
 ]
 
 [workspace.package]

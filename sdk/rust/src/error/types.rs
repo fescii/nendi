@@ -5,11 +5,13 @@ use crate::offset::Offset;
 /// Top-level error type for all SDK operations.
 #[derive(Debug, thiserror::Error)]
 pub enum NendiError {
-  /// Connection to daemon failed.
+  /// Connection to daemon failed (gRPC transport-level error).
+  #[cfg(feature = "grpc")]
   #[error("Connection failed: {0}")]
   Connection(#[from] tonic::transport::Error),
 
   /// Stream ended unexpectedly (not a clean shutdown).
+  #[cfg(feature = "grpc")]
   #[error("Stream disconnected: {0}")]
   Disconnected(tonic::Status),
 
